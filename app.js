@@ -373,7 +373,7 @@ function uploadFiles(req, res) {
 
                     if (completeTransactionItem(tid)) {
                         //notify_uploadCompletion(account, sid, {host: req.headers.host});
-                        renderCompletedUpload(directory, account);
+                        renderCompletedUpload(directory);
                     }
 
                 });
@@ -468,7 +468,6 @@ var run = async function () {
 function renderCompletedUpload(directory, account) {
 
     assert.strictEqual('object', typeof directory);
-    assert.strictEqual('object', typeof account);
 
     directory.browse(function (err, results) {
 
