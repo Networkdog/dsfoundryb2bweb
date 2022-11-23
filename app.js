@@ -55,7 +55,7 @@ var config = {
                 emailactivation: path.join(root, 'res/activate.htm')
             }
         },
-        uploaded: 'uploads/'
+        uploaded: '/azblob/'
     }
 
 };
