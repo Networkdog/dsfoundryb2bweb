@@ -312,7 +312,7 @@ function uploadFiles(req, res) {
         setTransactionByTransactionId(tid, tlen);
 
         var udir = config.path.uploaded;
-        console.log('SID: %s, TID: %s, DID: %s)', sid, tid, directory.directoryid);
+        //console.log('SID: %s, TID: %s, DID: %s)', sid, tid, directory.directoryid);
 
         if (status == 'done') {
 
@@ -326,7 +326,7 @@ function uploadFiles(req, res) {
 
                 if (completeTransactionItem(tid)) {
                     //notify_uploadCompletion(account, sid, {host: req.headers.host});
-                    renderCompletedUpload(directory);
+                    //renderCompletedUpload(directory);
                 }
 
             });
@@ -413,18 +413,6 @@ var run = async function () {
 		console.log('server listening on port ' + server.address().port);
 	});
 };
-
-function renderCompletedUpload(directory, account) {
-
-    assert.strictEqual('object', typeof directory);
-
-    directory.browse(function (err, results) {
-
-        console.dir(results);
-
-    });
-
-}
 
 async function initialize() {
 
