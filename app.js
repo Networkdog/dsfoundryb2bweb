@@ -372,7 +372,7 @@ var run = async function () {
     app.use('/css', express.static('css'));
     app.use('/img', express.static('img'));
     app.use('/js', express.static('js'));
-
+    app.get('/@ticket', handlers.ticket);
     app.get('/', handlers.homeForUpload);
     app.post('/', multiparty, handlers.upload);
     app.options('/', handlers.uploadOptions);
