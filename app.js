@@ -23,8 +23,6 @@ var filesize = require('filesize');
 
 require('dotenv').config();
 
-var Directories = require('./res/directories.js');
-
 var accounts;
 var shortcuts;
 
@@ -429,8 +427,6 @@ function renderCompletedUpload(directory, account) {
 }
 
 async function initialize() {
-
-    directories = new Directories(config, null);
 
 }
 
