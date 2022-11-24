@@ -4,8 +4,6 @@ var express = require('express');
 var path = require('path');
 var url = require('url');
 var fs = require('fs');
-var favicon = require('serve-favicon');
-var urlencode = require('urlencode');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multipart = require('connect-multiparty');
@@ -25,17 +23,10 @@ var filesize = require('filesize');
 
 require('dotenv').config();
 
-var Users = require('./res/users.js');
-var Accounts = require('./res/accounts.js');
-var Shortcuts = require('./res/shortcuts.js');
 var Directories = require('./res/directories.js');
 
-var users;
 var accounts;
 var shortcuts;
-var directories;
-
-
 
 const USERID_ANONYMOUS = '00000000-0000-0001-0005-000000000007';
 
@@ -63,10 +54,6 @@ var config = {
 var context = {
     db: null
 };
-
-var regex4email = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-var regex4guid = /^(\/){0,1}[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$/i;
-var regex4hexhash = /^(\/){0,1}[A-Fa-f0-9]{64}$/;
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -185,9 +172,6 @@ var handlers = {
 };
 
 var transactionMap = {};
-var fileAccessKeyMap = {};
-var slotAccessKeyMap = {};
-var sessions = {};
 
 function renderHTMLforShortcuts(shortcutList) {
 
@@ -329,58 +313,28 @@ function uploadFiles(req, res) {
 
         setTransactionByTransactionId(tid, tlen);
 
-        // var account = accounts.get(mail);
-        // var userid = account.owneruserid;
-        // var user;
-        // if (userid !== USERID_ANONYMOUS) {
-        //     user = users.get(userid, {
-        //         primaryemail: mail
-        //     });
-        // } else {
-        //     user = users.set({
-        //         primaryemail: mail
-        //     });
-        //     account.setOwner(user.userid);
-        // }
-
-        var directory = directories.getBySessionId(sid, {
-            owneruserid: USERID_ANONYMOUS,
-            sessionid: sid,
-            usagetype: 'mail'
-        });
-
-        var udir = directory.physicalpath;
+        var udir = config.path.uploaded;
         console.log('SID: %s, TID: %s, DID: %s)', sid, tid, directory.directoryid);
 
         if (status == 'done') {
 
             var upath = path.join(udir, filename);
+            var stream = fs.createWriteStream(upath);
 
-            directory.make(function (err) {
-                //assert.strictEqual('undefined', typeof err);
-                if (err) {
-                    console.log('Error while uploading a file - unable to make a directory (%s)', udir);
-                    res.status(500).send();
-                    return;
+            stream.on('finish', function () {
+
+                res.status(200).send();
+                flow.clean(identifier);
+
+                if (completeTransactionItem(tid)) {
+                    //notify_uploadCompletion(account, sid, {host: req.headers.host});
+                    renderCompletedUpload(directory);
                 }
 
-                var stream = fs.createWriteStream(upath);
-
-                stream.on('finish', function () {
-
-                    res.status(200).send();
-                    flow.clean(identifier);
-
-                    if (completeTransactionItem(tid)) {
-                        //notify_uploadCompletion(account, sid, {host: req.headers.host});
-                        renderCompletedUpload(directory);
-                    }
-
-                });
-
-                flow.write(identifier, stream/*, { onDone: flow.clean }*/);
             });
 
+            flow.write(identifier, stream/*, { onDone: flow.clean }*/);
+    
 
         }
         else if (status == 'partly_done') {
@@ -421,10 +375,7 @@ var run = async function () {
     app.use('/img', express.static('img'));
     app.use('/js', express.static('js'));
 
-    app.get('/@ticket', handlers.ticket);
-    app.get('/d/:key', handlers.download);
     app.get('/', handlers.homeForUpload);
-    //app.get(regex4email, handlers.homeForSendToMail);
     app.post('/', multiparty, handlers.upload);
     app.options('/', handlers.uploadOptions);
 
