@@ -166,6 +166,9 @@ var handlers = {
     },
     download: function (req, res) {
         downloadFile(req, res);
+    },
+    replicate: function (req, res) {
+        replicateFile(req, res);
     }
 };
 
@@ -256,6 +259,13 @@ function completeTransactionItem(key) {
     }
 
     return false;
+
+}
+
+function replicateFile(req, res) {
+
+    console.dir(req);
+    res.status(200).send("replicate");
 
 }
 
@@ -374,6 +384,7 @@ var run = async function () {
     app.use('/js', express.static('js'));
     app.get('/@ticket', handlers.ticket);
     app.get('/', handlers.homeForUpload);
+    app.put('/@replicate', handlers.replicate);
     app.post('/', multiparty, handlers.upload);
     app.options('/', handlers.uploadOptions);
 
